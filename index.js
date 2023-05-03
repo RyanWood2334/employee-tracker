@@ -1,5 +1,15 @@
 const inquirer = require("inquirer");
+const mysql = require("mysql2");
 
+const db = mysql.createConnection(
+  {
+    host: "localhost",
+    user: "root",
+    password: "password",
+    database: "employee_db",
+  },
+  console.log(`Connected to the employee_db database.`)
+);
 //build inquirer questions:
 //  -view all departments
 //  -view all employees
@@ -74,15 +84,29 @@ const init = () => {
 //add recursive functions for inquirer
 //view departments function
 const viewDepartments = () => {
-  console.log("you chose to view all departments!");
-  init();
+  db.query("SELECT * FROM departments", function (err, results) {
+    if (err) {
+      return "something went wrong";
+    } else {
+      console.table(results);
+      console.log("you chose to view all departments!");
+      init();
+    }
+  });
 };
 //  name/id's
 
 //view role function
 const viewRoles = () => {
-  console.log("you chose to view all Roles!");
-  init();
+  db.query("SELECT * FROM roles", function (err, results) {
+    if (err) {
+      return "something went wrong";
+    } else {
+      console.table(results);
+      init();
+      console.log("you chose to view all Roles!");
+    }
+  });
 };
 //  -job title
 //  -role id
@@ -91,8 +115,15 @@ const viewRoles = () => {
 
 //view all employees function
 const viewEmployees = () => {
-  console.log("you chose to view all Employees!");
-  init();
+  db.query("SELECT * FROM employees", function (err, results) {
+    if (err) {
+      return "something went wrong";
+    } else {
+      console.table(results);
+      console.log("you chose to view all Employees!");
+      init();
+    }
+  });
 };
 //  employee id's
 //  employee first names
