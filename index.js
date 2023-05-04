@@ -72,7 +72,6 @@ const init = () => {
           break;
         case "Quit":
           console.log("Bye-Bye!");
-          return;
           break;
 
         default:
@@ -132,7 +131,7 @@ const viewEmployees = () => {
 //  employee departments
 //  employee salaries
 //  employee managers that they report to
-
+//MAKE VARIABLES FOR YOUR SQL STRINGS
 //add a department
 const addDepartment = () => {
   inquirer
@@ -149,37 +148,60 @@ const addDepartment = () => {
     });
 };
 //  -name of dept
-
+//MAKE VARIABLES FOR YOUR SQL STRINGS
 //add a role
 const addRole = () => {
-  inquirer
-    .prompt([
-      {
-        type: "input",
-        name: "roleName",
-        message: "What is the name of the role you would like to add?",
-      },
-      {
-        type: "input",
-        name: "roleSalary",
-        message: "What is the salary of the role you would like to add?",
-      },
-      {
-        type: "input",
-        name: "roleDepartment",
-        message:
-          "Which department does the role you would like to add belong to?",
-      },
-    ])
-    .then((ans) => {
-      console.log(ans);
-      init();
-    });
+  db.query("SELECT * FROM departments", function (err, res) {
+    if (err) throw err;
+
+    inquirer
+      .prompt([
+        {
+          type: "input",
+          name: "roleName",
+          message: "What is the name of the role you would like to add?",
+        },
+        {
+          type: "input",
+          name: "roleSalary",
+          message: "What is the salary of the role you would like to add?",
+        },
+        {
+          type: "list",
+          name: "roleDepartment",
+          message:
+            "Which department id does the role you would like to add belong to?",
+          choices: res.map((res) => res.id + " " + "(" + res.name + ")"),
+        },
+      ])
+      .then((ans) => {
+        let newRole = [];
+        let roleName = ans.roleName;
+        let roleSalary = ans.roleSalary;
+        let roleDepartment = ans.roleDepartment.split(" ")[0];
+        newRole.push(roleName, roleSalary, roleDepartment);
+        console.log(roleName);
+        console.log(roleSalary);
+        console.log(roleDepartment);
+        console.log(newRole);
+        db.query(
+          `INSERT INTO roles (title, salary, department_id) VALUES (?)`,
+          [newRole],
+          (err, results) => {
+            if (err) {
+              throw err;
+            }
+            console.log("role added!!");
+            init();
+          }
+        );
+      });
+  });
 };
 //  -name
 //  -salary
 //  -department for role
-
+//MAKE VARIABLES FOR YOUR SQL STRINGS
 //add an employee
 const addEmployee = () => {
   inquirer
@@ -234,3 +256,43 @@ const updateRole = () => {
 //  -new role
 //
 init();
+
+// function empUpRole() {
+//     connection.query("SELECT * FROM employee", (err, res) => {
+//         if (err) throw err;
+//         inquirer.prompt([
+//             {
+//                 type: "list",
+//                 message: "Which employee's role would you like to update?",
+//                 name: "whichemp",
+//                 choices: res.map(res => res.id + " " + res.first_name + " " + res.last_name)
+//             }
+//         ]).then(employee => {
+//             let empId = employee.whichemp.split(' ')[0];
+
+//             connection.query("SELECT * FROM role", (err, res) => {
+//                 if (err) throw err;
+//                 inquirer.prompt([
+//                     {
+//                         type: "list",
+//                         message: "What is the employee's new role?",
+//                         name: "newrole",
+//                         choices: res.map(res => res.id + " " + res.title)
+//                     }
+//                 ]).then(newrole => {
+//                     let roleId = newrole.newrole.split(' ')[0];
+//                     console.log(empId, roleId)
+//                     console.log(employee, newrole)
+//                     console.log(newrole.id, employee.id)
+
+//                     let query = connection.query("UPDATE employee SET role_id = ? WHERE id = ?",
+//                         [roleId, empId],
+//                         (err, res) => {
+//                             if (err) throw err;
+//                         }
+//                     );
+//                     start();
+//                 });
+//             });
+//         });
+//     })
