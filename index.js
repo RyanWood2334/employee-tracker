@@ -281,7 +281,6 @@ const addEmployee = () => {
                   if (err) {
                     throw err;
                   }
-                  console.table(results);
                   console.log("employee added!!");
                   init();
                 }
@@ -291,11 +290,6 @@ const addEmployee = () => {
       });
   });
 };
-//     .then((ans) => {
-//       console.log(ans);
-//       init();
-//     });
-// })
 
 //  -first name
 //  -last name
@@ -304,18 +298,51 @@ const addEmployee = () => {
 
 //update an employee role
 const updateRole = () => {
-  inquirer
-    .prompt([
-      {
-        type: "list",
-        name: "employeeList",
-        message: "Which employee's role would you like to update?",
-      },
-    ])
-    .then((ans) => {
-      console.log(ans);
-      init();
-    });
+  db.query("SELECT * FROM employees", function (err, res) {
+    if (err) throw err;
+    inquirer
+      .prompt([
+        {
+          type: "list",
+          name: "employeeList",
+          message: "Which employee's role would you like to update?",
+          choices: res.map(
+            (res) =>
+              res.id + " " + "(" + res.first_name + " " + res.last_name + ")"
+          ),
+        },
+      ])
+      .then((ans) => {
+        let employeeToUpdate = ans.employeeList.split(" ")[0];
+        console.log(employeeToUpdate);
+
+        db.query("SELECT * FROM roles", function (err, res) {
+          if (err) throw err;
+          inquirer
+            .prompt([
+              {
+                type: "list",
+                name: "roleList",
+                message: "What is this employee's new role?",
+                choices: res.map((res) => res.id + " " + "(" + res.title + ")"),
+              },
+            ])
+            .then((ans) => {
+              console.log(ans);
+              let roleChosen = ans.roleList.split(" ")[0];
+              db.query(
+                "UPDATE employees SET role_id = ? WHERE id = ?",
+                [roleChosen, employeeToUpdate],
+                function (err, res) {
+                  if (err) throw err;
+                  console.log("employee role updated!");
+                  init();
+                }
+              );
+            });
+        });
+      });
+  });
 };
 //  -new role
 //
