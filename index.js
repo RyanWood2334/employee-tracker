@@ -281,6 +281,7 @@ const addEmployee = () => {
                   if (err) {
                     throw err;
                   }
+
                   console.log("employee added!!");
                   init();
                 }
